@@ -3,7 +3,7 @@ module github.com/insomniacslk/prometheus-neato-exporter
 go 1.18
 
 require (
-	github.com/insomniacslk/neato v0.0.0-20230127232740-2780d2bb9a84
+	github.com/insomniacslk/neato v0.0.0-20230130094113-7d941364ad82
 	github.com/prometheus/client_golang v1.14.0
 	github.com/spf13/pflag v1.0.5
 	sbinet.org/x/aranet4 v0.6.0

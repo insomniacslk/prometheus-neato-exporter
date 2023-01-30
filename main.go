@@ -25,24 +25,33 @@ var (
 	flagInterval = pflag.DurationP("interval", "i", 1*time.Minute, "Interval between sensor readings, expressed as a Go duration string")
 )
 
+var robotAttrs = []string{"name", "serial", "model", "firmware", "mac"}
+
 func makeGauge(name, help string) *prometheus.GaugeVec {
 	return prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "neato_" + name,
 			Help: "Neato - " + help,
 		},
-		[]string{"name", "serial", "model", "firmware", "mac"},
+		robotAttrs,
 	)
 }
 
 var (
 	batteryGauge = makeGauge("battery", "battery level (percentage)")
+	stateGauge   = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "neato_state",
+			Help: "Neato - robot state",
+		},
+		append(robotAttrs, "error", "alert", "state", "action", "category", "navigation_mode", "is_charging", "is_docked", "is_schedule_enabled", "dock_has_been_seen", "charge"),
+	)
 )
 
 func collector(robots []*neato.Robot) {
 	for {
 		for _, r := range robots {
-			state, err := r.State()
+			s, err := r.State()
 			if err != nil {
 				log.Printf("Failed to get state for robot '%s': %v", r.Name, err)
 				time.Sleep(*flagInterval)
@@ -60,7 +69,24 @@ func collector(robots []*neato.Robot) {
 			if r.MACAddress != nil {
 				mac = *r.MACAddress
 			}
-			batteryGauge.WithLabelValues(r.Name, r.Serial, model, firmware, mac).Set(float64(state.Details.Charge))
+			batteryGauge.WithLabelValues(r.Name, r.Serial, model, firmware, mac).Set(float64(s.Details.Charge))
+
+			errStr := "unset"
+			if s.Error != nil {
+				errStr = *s.Error
+			}
+			alert := "unset"
+			if s.Alert != nil {
+				alert = *s.Alert
+			}
+			stateGauge.WithLabelValues(
+				r.Name, r.Serial, model, firmware, mac,
+				errStr, alert, s.State.String(), s.Action.String(),
+				s.Cleaning.Category.String(), s.Cleaning.NavigationMode.String(),
+				strconv.FormatBool(s.Details.IsCharging), strconv.FormatBool(s.Details.IsDocked),
+				strconv.FormatBool(s.Details.IsScheduleEnabled), strconv.FormatBool(s.Details.DockHasBeenSeen),
+				strconv.FormatInt(int64(s.Details.Charge), 10),
+			).Set(1.)
 		}
 
 		time.Sleep(*flagInterval)
@@ -146,6 +172,9 @@ func main() {
 	// register all gauges
 	if err := prometheus.Register(batteryGauge); err != nil {
 		log.Fatalf("Failed to register Neato battery gauge: %v", err)
+	}
+	if err := prometheus.Register(stateGauge); err != nil {
+		log.Fatalf("Failed to register Neato state gauge: %v", err)
 	}
 
 	// start collector
