@@ -6,6 +6,7 @@ cleaner.
 It exports the following metrics:
 * `neato_battery`
 * `neato_state`
+* `neato_area`
 
 ## Run it
 ```

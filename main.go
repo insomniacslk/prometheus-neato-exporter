@@ -39,6 +39,7 @@ func makeGauge(name, help string) *prometheus.GaugeVec {
 
 var (
 	batteryGauge = makeGauge("battery", "battery level (percentage)")
+	areaGauge    = makeGauge("area", "cleaned area (square meters)")
 	stateGauge   = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "neato_state",
@@ -87,6 +88,22 @@ func collector(robots []*neato.Robot) {
 				strconv.FormatBool(s.Details.IsScheduleEnabled), strconv.FormatBool(s.Details.DockHasBeenSeen),
 				strconv.FormatInt(int64(s.Details.Charge), 10),
 			).Set(1.)
+
+			// get maps
+			maps, err := r.Maps()
+			if err != nil {
+				log.Printf("Failed to get maps for robot '%s' (serial '%s'): %v", r.Name, r.Serial, err)
+			} else {
+				if len(maps) == 0 {
+					log.Printf("No maps found for robot '%s': (serial: '%s')", r.Name, r.Serial)
+				} else {
+					if maps[0].CleanedArea != nil {
+						areaGauge.WithLabelValues(r.Name, r.Serial, model, firmware, mac).Set(float64(*maps[0].CleanedArea))
+					} else {
+						log.Printf("No cleaned area is set for robo '%s' (serial: '%s')", r.Name, r.Serial)
+					}
+				}
+			}
 		}
 
 		time.Sleep(*flagInterval)
@@ -172,6 +189,9 @@ func main() {
 	// register all gauges
 	if err := prometheus.Register(batteryGauge); err != nil {
 		log.Fatalf("Failed to register Neato battery gauge: %v", err)
+	}
+	if err := prometheus.Register(areaGauge); err != nil {
+		log.Fatalf("Failed to register Neato area gauge: %v", err)
 	}
 	if err := prometheus.Register(stateGauge); err != nil {
 		log.Fatalf("Failed to register Neato state gauge: %v", err)

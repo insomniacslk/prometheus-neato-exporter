@@ -172,6 +172,8 @@ github.com/insomniacslk/neato v0.0.0-20230130112850-15b62e0caf00 h1:2QW63sAnsoTz
 github.com/insomniacslk/neato v0.0.0-20230130112850-15b62e0caf00/go.mod h1:BtLdCq2Mkj4bndsiOpk3v6M3VDryQhOf4WVQ5wn+maU=
 github.com/insomniacslk/neato v0.0.0-20230130114919-1cd107e74281 h1:lKSEk99DkxHAmMOlw9+GwIF8PE43mG0T7j0wjl2qpyU=
 github.com/insomniacslk/neato v0.0.0-20230130114919-1cd107e74281/go.mod h1:BtLdCq2Mkj4bndsiOpk3v6M3VDryQhOf4WVQ5wn+maU=
+github.com/insomniacslk/neato v0.0.0-20230131131208-7736bb24bbc9 h1:8QHo+GoO6eZeRu9oiRyvZYOy2EsH2Xa27IspjbkIhTo=
+github.com/insomniacslk/neato v0.0.0-20230131131208-7736bb24bbc9/go.mod h1:BtLdCq2Mkj4bndsiOpk3v6M3VDryQhOf4WVQ5wn+maU=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
 github.com/jung-kurt/gofpdf v1.0.0/go.mod h1:7Id9E/uU8ce6rXgefFLlgrJj/GYY22cpxn+r32jIOes=
